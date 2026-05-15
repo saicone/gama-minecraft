@@ -1,0 +1,5 @@
+rootProject.name = 'gama-minecraft'
+
+include 'bukkit'
+include 'bungeecord'
+include 'velocity'
