@@ -15,3 +15,13 @@ public class MyPlugin extends JavaPlugin {
     }
 }
 ```
+
+## initialization - Events
+
+```java
+public class MyPlugin extends JavaPlugin {
+    public MyPlugin() {
+        Events.PLUGIN = this;
+    }
+}
+```
