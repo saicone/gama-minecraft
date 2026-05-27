@@ -85,7 +85,7 @@ public class Audiences {
         } else {
             try {
                 final NamespacedKey key = world.getKey();
-                return ((BukkitAudiences) Provider.INSTANCE).world(Key.key(key.namespace(), key.getKey()));
+                return ((BukkitAudiences) Provider.INSTANCE).world(Key.key(key.getNamespace(), key.getKey()));
             } catch (NoSuchMethodError e) {
                 return ((BukkitAudiences) Provider.INSTANCE).world(Key.key("minecraft", world.getName()));
             }
