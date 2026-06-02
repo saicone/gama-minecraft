@@ -38,8 +38,8 @@ public interface BukkitCommandConfig {
     static BukkitCommandConfig valueOf(boolean register, @NotNull String name) {
         return new BukkitCommandConfig() {
             @Override
-            public boolean register() {
-                return register;
+            public Optional<Boolean> register() {
+                return Optional.of(register);
             }
 
             @Override
@@ -53,8 +53,12 @@ public interface BukkitCommandConfig {
     static BukkitCommandConfig valueOf(@NotNull ConfigurationSection config) {
         return new BukkitCommandConfig() {
             @Override
-            public boolean register() {
-                return config.getBoolean("register", true);
+            public Optional<Boolean> register() {
+                if (config.isSet("register")) {
+                    return Optional.of(config.getBoolean("register", true));
+                } else {
+                    return Optional.empty();
+                }
             }
 
             @Override
@@ -63,8 +67,12 @@ public interface BukkitCommandConfig {
             }
 
             @Override
-            public @NotNull Set<String> aliases() {
-                return config.getStringList("aliases").stream().filter(s -> !s.isEmpty()).collect(Collectors.toSet());
+            public @NotNull Optional<Set<String>> aliases() {
+                if (config.isSet("aliases")) {
+                    return Optional.of(config.getStringList("aliases").stream().filter(s -> !s.isEmpty()).collect(Collectors.toSet()));
+                } else {
+                    return Optional.empty();
+                }
             }
 
             @Override
@@ -78,14 +86,18 @@ public interface BukkitCommandConfig {
             }
 
             @Override
-            public @NotNull BukkitCommandConfig command(@NotNull String name) {
-                return valueOf(config.getConfigurationSection("sub." + name));
+            public @NotNull Optional<BukkitCommandConfig> command(@NotNull String name) {
+                if (config.isSet("sub." + name)) {
+                    return Optional.of(valueOf(config.getConfigurationSection("sub." + name)));
+                } else {
+                    return Optional.empty();
+                }
             }
         };
     }
 
-    default boolean register() {
-        return false;
+    default Optional<Boolean> register() {
+        return Optional.empty();
     }
 
     @NotNull
@@ -94,8 +106,8 @@ public interface BukkitCommandConfig {
     }
 
     @NotNull
-    default Set<String> aliases() {
-        return Set.of();
+    default Optional<Set<String>> aliases() {
+        return Optional.empty();
     }
 
     @NotNull
@@ -109,7 +121,7 @@ public interface BukkitCommandConfig {
     }
 
     @NotNull
-    default BukkitCommandConfig command(@NotNull String name) {
-        return EMPTY;
+    default Optional<BukkitCommandConfig> command(@NotNull String name) {
+        return Optional.empty();
     }
 }

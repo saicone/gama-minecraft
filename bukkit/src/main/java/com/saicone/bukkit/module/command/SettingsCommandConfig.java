@@ -23,13 +23,13 @@
  */
 package com.saicone.bukkit.module.command;
 
+import com.saicone.settings.SettingsNode;
 import com.saicone.settings.node.MapNode;
 import com.saicone.types.Types;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class SettingsCommandConfig {
 
@@ -37,8 +37,8 @@ public class SettingsCommandConfig {
     public static BukkitCommandConfig valueOf(@NotNull MapNode config) {
         return new BukkitCommandConfig() {
             @Override
-            public boolean register() {
-                return config.get("register").asBoolean(true);
+            public Optional<Boolean> register() {
+                return Types.BOOLEAN.optional(config.get("register").getValue());
             }
 
             @Override
@@ -47,8 +47,8 @@ public class SettingsCommandConfig {
             }
 
             @Override
-            public @NotNull Set<String> aliases() {
-                return config.get("aliases").asList(Types.STRING).stream().filter(s -> !s.isEmpty()).collect(Collectors.toSet());
+            public @NotNull Optional<Set<String>> aliases() {
+                return Types.STRING.set().optional(config.get("aliases").getValue());
             }
 
             @Override
@@ -62,8 +62,13 @@ public class SettingsCommandConfig {
             }
 
             @Override
-            public @NotNull BukkitCommandConfig command(@NotNull String name) {
-                return valueOf(config.get("sub", name).asMapNode());
+            public @NotNull Optional<BukkitCommandConfig> command(@NotNull String name) {
+                final SettingsNode node = config.get("sub", name);
+                if (node.isMap()) {
+                    return Optional.of(valueOf(node.asMapNode()));
+                } else {
+                    return Optional.empty();
+                }
             }
         };
     }

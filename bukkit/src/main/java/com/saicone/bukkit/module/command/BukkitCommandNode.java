@@ -95,8 +95,8 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
             final String permission = PERMISSION_PREFIX.endsWith(".") ? PERMISSION_PREFIX.substring(PERMISSION_PREFIX.length() - 1) : PERMISSION_PREFIX;
             config = new BukkitCommandConfig() {
                 @Override
-                public boolean register() {
-                    return true;
+                public Optional<Boolean> register() {
+                    return Optional.of(true);
                 }
 
                 @Override
@@ -111,16 +111,20 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
     public void load(@NotNull BukkitCommandConfig config) {
         if (subCommands != null) {
             for (BukkitCommandNode subCommand : subCommands) {
-                if (subCommand.main()) {
-                    subCommand.load(config.command(subCommand.getId()));
-                }
+                config.command(subCommand.getId()).ifPresent(subCommand::load);
             }
         }
-        register = config.register();
+        config.register().ifPresent(register -> {
+            this.register = register;
+        });
 
-        name = config.name().orElse(id);
+        config.name().ifPresent(name -> {
+            this.name = name;
+        });
 
-        aliases = config.aliases();
+        config.aliases().ifPresent(aliases -> {
+            this.aliases = aliases;
+        });
         // Fix invalid aliases
         if (aliases.contains(name)) {
             aliases = new HashSet<>(aliases);
@@ -196,16 +200,7 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
     }
 
     protected void subCommand(@NotNull String id, @NotNull BukkitCommandExecution execution) {
-        subCommand(id, execution, false);
-    }
-
-    protected void subCommand(@NotNull String id, @NotNull BukkitCommandExecution execution, boolean main) {
         subCommand(new BukkitCommandNode(id) {
-            @Override
-            public boolean main() {
-                return main;
-            }
-
             @Override
             public void execute(@NotNull CommandSender sender, @NotNull String[] cmd, @NotNull String[] args) {
                 execution.execute(sender, cmd, args);
@@ -214,16 +209,7 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
     }
 
     public void subCommand(@NotNull String id, int minArgs, @NotNull BukkitCommandExecution execution) {
-        subCommand(id, minArgs, execution, false);
-    }
-
-    public void subCommand(@NotNull String id, int minArgs, @NotNull BukkitCommandExecution execution, boolean main) {
         subCommand(new BukkitCommandNode(id) {
-            @Override
-            public boolean main() {
-                return main;
-            }
-
             @Override
             public int getMinArgs() {
                 return minArgs;
@@ -246,10 +232,6 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
             }
         }
         return false;
-    }
-
-    public boolean main() {
-        return true;
     }
 
     public boolean isRegister() {
