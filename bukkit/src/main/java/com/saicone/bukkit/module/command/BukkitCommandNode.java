@@ -430,10 +430,7 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
         if (usage.isBlank()) {
             return;
         }
-        final Object[] array = new Object[args.length + 1];
-        array[0] = String.join(" ", cmd);
-        System.arraycopy(args, 0, array, 1, args.length);
-        sender.sendMessage(replaceArgs(usage, array));
+        sender.sendMessage(replaceArgs(usage, joinArgs(cmd, args)));
         if (getSubCommands() != null) {
             for (BukkitCommandNode subCommand : getSubCommands()) {
                 subCommand.sendSubUsage(sender);
@@ -444,6 +441,14 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
     public void sendSubUsage(@NotNull CommandSender sender) {
         final String description = getDescription(sender);
         sender.sendMessage(ChatColor.GOLD + "> " + ChatColor.RED + getName() + (description.isBlank() ? "" : ChatColor.GOLD + " - " + ChatColor.GRAY + description));
+    }
+
+    @NotNull
+    protected Object[] joinArgs(@NotNull String[] cmd, @NotNull String[] args) {
+        final Object[] array = new Object[args.length + 1];
+        array[0] = String.join(" ", cmd);
+        System.arraycopy(args, 0, array, 1, args.length);
+        return array;
     }
 
     @NotNull
