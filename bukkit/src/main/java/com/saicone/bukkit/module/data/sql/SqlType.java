@@ -51,7 +51,7 @@ public enum SqlType implements ClientType {
     ),
     POSTGRESQL(
             true,
-            "jdbc:mariadb://{address}/{database}{flags}",
+            "jdbc:postgresql://{address}/{database}{flags}",
             "org{}postgresql:postgresql:42.7.11",
             "org.postgresql.Driver",
             Map.of("org{}postgresql", "org.postgresql")
