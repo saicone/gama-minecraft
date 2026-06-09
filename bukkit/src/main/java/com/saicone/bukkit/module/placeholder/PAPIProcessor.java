@@ -72,27 +72,33 @@ public class PAPIProcessor implements Placeholders.Processor {
     }
 
     public boolean contains(@NotNull String s) {
-        return contains(PlaceholderAPI.getPlaceholderPattern(), s);
+        if (enabled()) {
+            return contains(PlaceholderAPI.getPlaceholderPattern(), s);
+        } else {
+            return false;
+        }
     }
 
     public boolean containsBracket(@NotNull String s) {
-        return contains(PlaceholderAPI.getBracketPlaceholderPattern(), s);
+        if (enabled()) {
+            return contains(PlaceholderAPI.getBracketPlaceholderPattern(), s);
+        } else {
+            return false;
+        }
     }
 
     private boolean contains(@NotNull Pattern pattern, @NotNull String s) {
-        if (enabled()) {
-            final Matcher matcher = pattern.matcher(s);
-            while (matcher.find()) {
-                String match = matcher.group(1);
-                final int index = match.indexOf('_');
-                if (index == 0) {
-                    continue;
-                } else if (index > 0) {
-                    match = match.substring(0, index);
-                }
-                if (PlaceholderAPI.isRegistered(match)) {
-                    return true;
-                }
+        final Matcher matcher = pattern.matcher(s);
+        while (matcher.find()) {
+            String match = matcher.group(1);
+            final int index = match.indexOf('_');
+            if (index == 0) {
+                continue;
+            } else if (index > 0) {
+                match = match.substring(0, index);
+            }
+            if (PlaceholderAPI.isRegistered(match)) {
+                return true;
             }
         }
         return false;
