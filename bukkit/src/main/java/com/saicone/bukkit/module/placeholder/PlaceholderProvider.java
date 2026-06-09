@@ -38,7 +38,9 @@ public interface PlaceholderProvider<T> {
     Object getStatic(T t, @NotNull String key);
 
     @Nullable
-    Object getDynamic(T t, @NotNull String context);
+    default Object getDynamic(T t, @NotNull String context) {
+        return null;
+    }
 
     @Nullable
     Object parseParameters(T t, @NotNull String parameters);

@@ -92,11 +92,6 @@ public class PlaceholderProviderImpl<T> implements PlaceholderProvider<T> {
     }
 
     @Override
-    public @Nullable Object getDynamic(T t, @NotNull String context) {
-        return null;
-    }
-
-    @Override
     public @Nullable Object parseParameters(T t, @NotNull String parameters) {
         if (!this.staticPlaceholder.isEmpty()) {
             final Function<T, Object> function = this.staticPlaceholder.get(parameters);
