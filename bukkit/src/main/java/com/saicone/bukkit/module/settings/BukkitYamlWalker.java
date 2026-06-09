@@ -37,6 +37,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
@@ -211,19 +212,50 @@ public class BukkitYamlWalker implements Iterable<YamlConfiguration> {
 
     @NotNull
     public static <T extends ConfigurationSection> T parse(@NotNull T section, @NotNull UnaryOperator<String> operator) {
-        for (String key : section.getKeys(false)) {
-            final Object value = section.get(key);
-            if (value instanceof ConfigurationSection) {
-                parse((ConfigurationSection) value, operator);
-                section.set(key, value);
-            } else if (value instanceof String) {
-                final String oldValue = (String) value;
-                final String newValue = operator.apply(oldValue);
-                if (!oldValue.equals(newValue)) {
-                    section.set(key, newValue);
-                }
+        for (String path : section.getKeys(true)) {
+            final Object value = parseValue(section.get(path), operator);
+            if (value != null) {
+                section.set(path, value);
             }
         }
         return section;
+    }
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    private static Object parseValue(@Nullable Object value, @NotNull UnaryOperator<String> operator) {
+        if (value instanceof String) {
+            final String oldValue = (String) value;
+            final String newValue = operator.apply(oldValue);
+            if (!oldValue.equals(newValue)) {
+                return newValue;
+            }
+        } else if (value instanceof Map<?, ?>) {
+            boolean modified = false;
+            for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
+                final Object newValue = parseValue(entry.getValue(), operator);
+                if (newValue != null) {
+                    entry.setValue(newValue);
+                    modified = true;
+                }
+            }
+            if (modified) {
+                return value;
+            }
+        } else if (value instanceof List<?>) {
+            boolean modified = false;
+            final List<Object> list = (List<Object>) value;
+            for (int i = 0; i < list.size(); i++) {
+                final Object newValue = parseValue(list.get(i), operator);
+                if (newValue != null) {
+                    list.set(i, newValue);
+                    modified = true;
+                }
+            }
+            if (modified) {
+                return value;
+            }
+        }
+        return null;
     }
 }
