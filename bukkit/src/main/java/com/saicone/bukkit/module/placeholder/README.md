@@ -1,15 +1,15 @@
 # bukkit placeholder module
 
-* only execute something when PlaceholderAPI is present
+* multiple placeholder processor support
 * placeholder text detection
 * placeholder text replacement
-* placeholder registration
+* static and dynamic placeholder registration
 
 ## dependencies
 
 * PlaceholderAPI: https://github.com/PlaceholderAPI/PlaceholderAPI
 
-## usage - registering a placeholder
+## usage - simple PlaceholderAPI placeholder
 
 Placeholder declaration
 ```java
@@ -37,14 +37,14 @@ public class MyPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         // If your placeholder use Player
-        Placeholders.register(this, this.myPlaceholder.getNames(), this.myPlaceholder);
+        Placeholders.papi().register(this, this.myPlaceholder.getNames(), this.myPlaceholder);
         // If your placeholder use OfflinePlayer
-        Placeholders.registerOffline(this, this.myPlaceholder.getNames(), this.myPlaceholder);
+        Placeholders.papi().registerOffline(this, this.myPlaceholder.getNames(), this.myPlaceholder);
     }
 
     @Override
     public void onDisable() {
-        Placeholders.unregister(this.myPlaceholder.getNames());
+        Placeholders.papi().unregister(this.myPlaceholder.getNames());
     }
 }
 ```
