@@ -1,7 +1,7 @@
 /*
  * This file is part of PixelBuy, licensed under the MIT License
  *
- * Copyright (c) 2024-2026 Rubenicos
+ * Copyright (c) 2026 Rubenicos
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,14 +23,18 @@
  */
 package com.saicone.bukkit.module.placeholder;
 
-import com.saicone.bukkit.module.placeholder.processor.PAPIProcessor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class Placeholders {
+public interface MappedPlaceholderProvider<T> extends PlaceholderProvider<T> {
 
     @NotNull
-    public static PAPIProcessor papi() {
-        return PAPIProcessor.INSTANCE;
+    Class<T> getType();
+
+    default boolean acceptGlobal() {
+        return true;
     }
 
+    @Nullable
+    T map(@NotNull Object object);
 }

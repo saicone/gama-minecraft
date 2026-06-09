@@ -1,7 +1,7 @@
 /*
  * This file is part of PixelBuy, licensed under the MIT License
  *
- * Copyright (c) 2024-2026 Rubenicos
+ * Copyright (c) 2026 Rubenicos
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,16 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.bukkit.module.placeholder;
+package com.saicone.bukkit.module.placeholder.provider;
 
-import com.saicone.bukkit.module.placeholder.processor.PAPIProcessor;
+import com.saicone.bukkit.module.placeholder.MappedPlaceholderProvider;
 import org.jetbrains.annotations.NotNull;
 
-public class Placeholders {
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
-    @NotNull
-    public static PAPIProcessor papi() {
-        return PAPIProcessor.INSTANCE;
+public abstract class MappedPlaceholderProviderImpl<T> extends PlaceholderProviderImpl<T> implements MappedPlaceholderProvider<T> {
+
+    public MappedPlaceholderProviderImpl() {
+        this(new HashMap<>());
     }
 
+    public MappedPlaceholderProviderImpl(@NotNull Map<String, Function<T, Object>> staticPlaceholder) {
+        super(staticPlaceholder);
+    }
 }

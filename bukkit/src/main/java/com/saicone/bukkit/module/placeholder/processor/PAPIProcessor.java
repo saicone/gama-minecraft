@@ -21,8 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.bukkit.module.placeholder;
+package com.saicone.bukkit.module.placeholder.processor;
 
+import com.saicone.bukkit.module.placeholder.provider.DelegatePlaceholderProvider;
+import com.saicone.bukkit.module.placeholder.MappedPlaceholderProvider;
+import com.saicone.bukkit.module.placeholder.PlaceholderProcessor;
+import com.saicone.bukkit.module.placeholder.PlaceholderProvider;
+import com.saicone.bukkit.module.placeholder.PluginPlaceholder;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -45,7 +50,7 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PAPIProcessor implements Placeholders.Processor {
+public class PAPIProcessor implements PlaceholderProcessor {
 
     public static final PAPIProcessor INSTANCE = new PAPIProcessor();
     // lazy init var
@@ -157,14 +162,14 @@ public class PAPIProcessor implements Placeholders.Processor {
         final String version = placeholder.getPlugin().getDescription().getVersion();
         if (placeholder.getType().equals(Player.class)) {
             for (String name : placeholder.getNames()) {
-                registerOnline(placeholder.getPlugin(), name, author, version, (Placeholders.Provider<Player>) placeholder.getProvider());
+                registerOnline(placeholder.getPlugin(), name, author, version, (PlaceholderProvider<Player>) placeholder.getProvider());
             }
         } else {
-            final Placeholders.Provider<OfflinePlayer> provider;
+            final PlaceholderProvider<OfflinePlayer> provider;
             if (placeholder.getType().equals(OfflinePlayer.class)) {
-                provider = (Placeholders.Provider<OfflinePlayer>) placeholder.getProvider();
+                provider = (PlaceholderProvider<OfflinePlayer>) placeholder.getProvider();
             } else {
-                provider = new Placeholders.DelegateProvider<>((Placeholders.MappedProvider<?>) placeholder.getProvider());
+                provider = new DelegatePlaceholderProvider<>((MappedPlaceholderProvider<?>) placeholder.getProvider());
             }
             for (String name : placeholder.getNames()) {
                 registerOffline(placeholder.getPlugin(), name, author, version, provider);
@@ -172,7 +177,7 @@ public class PAPIProcessor implements Placeholders.Processor {
         }
     }
 
-    private void registerOffline(@NotNull Plugin plugin, @NotNull String name, @NotNull String author, @NotNull String version, @NotNull Placeholders.Provider<OfflinePlayer> provider) {
+    private void registerOffline(@NotNull Plugin plugin, @NotNull String name, @NotNull String author, @NotNull String version, @NotNull PlaceholderProvider<OfflinePlayer> provider) {
         final PlaceholderExpansion expansion = new PlaceholderExpansion() {
             @Override
             public @NotNull String getIdentifier() {
@@ -198,7 +203,7 @@ public class PAPIProcessor implements Placeholders.Processor {
         registerExpansion(plugin, expansion);
     }
 
-    private void registerOnline(@NotNull Plugin plugin, @NotNull String name, @NotNull String author, @NotNull String version, @NotNull Placeholders.Provider<Player> provider) {
+    private void registerOnline(@NotNull Plugin plugin, @NotNull String name, @NotNull String author, @NotNull String version, @NotNull PlaceholderProvider<Player> provider) {
         final PlaceholderExpansion expansion = new PlaceholderExpansion() {
             @Override
             public @NotNull String getIdentifier() {

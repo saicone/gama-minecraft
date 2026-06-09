@@ -23,6 +23,7 @@
  */
 package com.saicone.bukkit.module.placeholder;
 
+import com.saicone.bukkit.module.placeholder.provider.ComposedPlaceholderProvider;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,14 +40,14 @@ public class PluginPlaceholder<T> {
     private final Class<T> type;
 
     private Set<String> names = Set.of();
-    private Placeholders.Provider<T> provider;
-    private final Set<Placeholders.Processor> processors = new HashSet<>();
+    private PlaceholderProvider<T> provider;
+    private final Set<PlaceholderProcessor> processors = new HashSet<>();
 
     public PluginPlaceholder(@NotNull Plugin plugin, @NotNull Class<T> type) {
         this(plugin, type, null);
     }
 
-    public PluginPlaceholder(@NotNull Plugin plugin, @NotNull Class<T> type, @Nullable Placeholders.Provider<T> provider) {
+    public PluginPlaceholder(@NotNull Plugin plugin, @NotNull Class<T> type, @Nullable PlaceholderProvider<T> provider) {
         this.plugin = plugin;
         this.type = type;
         this.provider = provider;
@@ -67,31 +68,31 @@ public class PluginPlaceholder<T> {
         return Collections.unmodifiableSet(names);
     }
 
-    public Placeholders.Provider<T> getProvider() {
+    public PlaceholderProvider<T> getProvider() {
         return provider;
     }
 
     @NotNull
-    public Set<Placeholders.Processor> getProcessors() {
+    public Set<PlaceholderProcessor> getProcessors() {
         return processors;
     }
 
-    public void put(@NotNull Placeholders.Provider<T> provider) {
-        if (this.provider != null && this.provider instanceof Placeholders.ComposedProvider<T>) {
-            this.provider = new Placeholders.ComposedProvider<>(provider, ((Placeholders.ComposedProvider<T>) this.provider).children());
+    public void put(@NotNull PlaceholderProvider<T> provider) {
+        if (this.provider != null && this.provider instanceof ComposedPlaceholderProvider<T>) {
+            this.provider = new ComposedPlaceholderProvider<>(provider, ((ComposedPlaceholderProvider<T>) this.provider).children());
         } else {
             this.provider = provider;
         }
     }
 
-    public void putMapped(@NotNull Placeholders.MappedProvider<?> provider) {
-        if (!(this.provider instanceof Placeholders.ComposedProvider<T>)) {
-            this.provider = new Placeholders.ComposedProvider<>(this.provider, new ArrayList<>());
+    public void putMapped(@NotNull MappedPlaceholderProvider<?> provider) {
+        if (!(this.provider instanceof ComposedPlaceholderProvider<T>)) {
+            this.provider = new ComposedPlaceholderProvider<>(this.provider, new ArrayList<>());
         }
-        ((Placeholders.ComposedProvider<T>) this.provider).children().add(provider);
+        ((ComposedPlaceholderProvider<T>) this.provider).children().add(provider);
     }
 
-    public void processors(@Nullable Placeholders.Processor... processors) {
+    public void processors(@Nullable PlaceholderProcessor... processors) {
         this.processors.clear();
         if (processors != null) {
             Collections.addAll(this.processors, processors);
@@ -107,13 +108,13 @@ public class PluginPlaceholder<T> {
             unregister();
         }
         this.names = new HashSet<>(names);
-        for (Placeholders.Processor processor : this.processors) {
+        for (PlaceholderProcessor processor : this.processors) {
             processor.register(this);
         }
     }
 
     public void unregister() {
-        for (Placeholders.Processor processor : this.processors) {
+        for (PlaceholderProcessor processor : this.processors) {
             processor.unregister(this);
         }
     }
