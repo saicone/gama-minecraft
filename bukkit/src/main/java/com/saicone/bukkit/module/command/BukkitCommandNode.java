@@ -85,11 +85,11 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
         this.name = id;
     }
 
-    public void load() {
-        load(true);
+    public void register() {
+        register(true);
     }
 
-    public void load(boolean register) {
+    public void register(boolean register) {
         BukkitCommandConfig config = BukkitCommandConfig.EMPTY;
         if (register) {
             final String permission = PERMISSION_PREFIX.endsWith(".") ? PERMISSION_PREFIX.substring(PERMISSION_PREFIX.length() - 1) : PERMISSION_PREFIX;
@@ -105,13 +105,13 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
                 }
             };
         }
-        load(config);
+        register(config);
     }
 
-    public void load(@NotNull BukkitCommandConfig config) {
+    public void register(@NotNull BukkitCommandConfig config) {
         if (subCommands != null) {
             for (BukkitCommandNode subCommand : subCommands) {
-                config.command(subCommand.getId()).ifPresent(subCommand::load);
+                config.command(subCommand.getId()).ifPresent(subCommand::register);
             }
         }
         config.register().ifPresent(register -> {
@@ -176,7 +176,7 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
         }
     }
 
-    public void unload() {
+    public void unregister() {
         if (bridge != null) {
             BukkitCommand.unregister(bridge);
         }
