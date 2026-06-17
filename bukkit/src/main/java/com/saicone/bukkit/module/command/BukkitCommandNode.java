@@ -163,12 +163,15 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
         final String permissionPath = PERMISSION_PREFIX + getPath();
         final String defaultPermission = permissionPath + ";" + permissionPath.substring(0, permissionPath.lastIndexOf('.') + 1) + "*";
         permission = config.permission().map(perm -> {
-            return switch (perm) {
-                case Boolean bool -> bool ? defaultPermission : "";
-                case String s -> s;
-                case Collection<?> collection -> collection.stream().filter(String.class::isInstance).map(String.class::cast).collect(Collectors.joining(";"));
-                default -> null;
-            };
+            if (perm instanceof Boolean) {
+                return (Boolean) perm ? defaultPermission : "";
+            } else if (perm instanceof String) {
+                return (String) perm;
+            } else if (perm instanceof Collection<?>) {
+                return ((Collection<?>) perm).stream().filter(String.class::isInstance).map(String.class::cast).collect(Collectors.joining(";"));
+            } else {
+                return null;
+            }
         }).orElse(defaultPermission);
 
         final String delay = config.delay().orElse(null);
@@ -273,8 +276,8 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
             return true;
         }
 
-        if (sender instanceof Player player && sender.isOp() && USE_LUCKPERMS.get()) {
-            final var data = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId()).getCachedData().getPermissionData();
+        if (sender instanceof Player && sender.isOp() && USE_LUCKPERMS.get()) {
+            final var data = LuckPermsProvider.get().getUserManager().getUser(((Player) sender).getUniqueId()).getCachedData().getPermissionData();
             for (String p : permission.split(";")) {
                 if (data.checkPermission(p).asBoolean()) {
                     return true;
