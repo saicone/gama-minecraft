@@ -24,8 +24,6 @@
 package com.saicone.bukkit.module.command;
 
 import com.google.common.base.Enums;
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import net.luckperms.api.LuckPermsProvider;
@@ -45,6 +43,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public abstract class BukkitCommandNode implements BukkitCommandExecution {
@@ -54,13 +53,26 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
     protected BukkitCommandNode root;
     private final String id;
     protected List<BukkitCommandNode> subCommands;
-    private final Supplier<String> path = Suppliers.memoize(() -> {
-        if (getRoot() != null) {
-            return getRoot().getPath() + "." + getId();
-        } else {
-            return getId();
+    // lazy init var
+    private final Supplier<String> path = new Supplier<>() {
+        private volatile String value;
+
+        @Override
+        public String get() {
+            if (value == null) {
+                synchronized (this) {
+                    if (value == null) {
+                        if (getRoot() != null) {
+                            value = getRoot().getPath() + "." + getId();
+                        } else {
+                            value = getId();
+                        }
+                    }
+                }
+            }
+            return value;
         }
-    });
+    };
 
     protected boolean register;
     protected String name;
