@@ -27,6 +27,7 @@ import com.google.common.base.Enums;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import net.luckperms.api.LuckPermsProvider;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -49,6 +50,22 @@ import java.util.stream.Collectors;
 public abstract class BukkitCommandNode implements BukkitCommandExecution {
 
     public static String PERMISSION_PREFIX = "";
+    // lazy init var
+    private static final Supplier<Boolean> USE_LUCKPERMS = new Supplier<>() {
+        private volatile Boolean value;
+
+        @Override
+        public Boolean get() {
+            if (value == null) {
+                synchronized (this) {
+                    if (value == null) {
+                        value = Bukkit.getPluginManager().getPlugin("LuckPerms") != null;
+                    }
+                }
+            }
+            return value;
+        }
+    };
 
     protected BukkitCommandNode root;
     private final String id;
@@ -256,7 +273,7 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
             return true;
         }
 
-        if (sender instanceof Player player && sender.isOp()) {
+        if (sender instanceof Player player && sender.isOp() && USE_LUCKPERMS.get()) {
             final var data = LuckPermsProvider.get().getUserManager().getUser(player.getUniqueId()).getCachedData().getPermissionData();
             for (String p : permission.split(";")) {
                 if (data.checkPermission(p).asBoolean()) {
