@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.bukkit.module.data.sql;
+package com.saicone.minecraft.module.data.sql;
 
-import com.saicone.bukkit.module.data.ClientType;
+import com.saicone.minecraft.module.data.ClientType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

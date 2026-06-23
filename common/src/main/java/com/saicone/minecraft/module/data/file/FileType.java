@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.bukkit.module.data.file;
+package com.saicone.minecraft.module.data.file;
 
 import com.saicone.settings.SettingsSource;
-import com.saicone.bukkit.module.data.ClientType;
+import com.saicone.minecraft.module.data.ClientType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
