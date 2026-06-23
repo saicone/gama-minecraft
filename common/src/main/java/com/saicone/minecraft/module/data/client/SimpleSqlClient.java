@@ -97,7 +97,7 @@ public abstract class SimpleSqlClient {
             this.password = string(config, "password").orElse("");
         } else {
             // url parameters
-            final String strPath = string(config, "path").orElse(directory().toString() + File.separator + this.type.name().toLowerCase());
+            final String strPath = string(config, "path").orElse(directory().resolve(this.type.name().toLowerCase()).toString());
             final Path path = Path.of(strPath);
             if (strPath.contains(File.separator) && !Files.exists(path.getParent())) {
                 try {
@@ -118,7 +118,7 @@ public abstract class SimpleSqlClient {
     public void start() {
         boolean useHikari = false;
         try {
-            Class.forName("om.zaxxer.hikari.HikariDataSource");
+            Class.forName("com.zaxxer.hikari.HikariDataSource");
             useHikari = true;
         } catch (Throwable ignored) { }
 
@@ -209,8 +209,10 @@ public abstract class SimpleSqlClient {
         });
     }
 
-    protected static boolean isTablePresent(@NotNull Connection con, @NotNull String tableName) throws SQLException {
-        try (ResultSet set = con.getMetaData().getTables(con.getCatalog(), null, "%", null)) {
+    protected boolean isTablePresent(@NotNull Connection con, @NotNull String tableName) throws SQLException {
+        try (ResultSet set = this.type == SqlType.POSTGRESQL
+                ? con.getMetaData().getTables(null, null, "%", new String[] { "TABLE" })
+                : con.getMetaData().getTables(con.getCatalog(), null, "%", null)) {
             while (set.next()) {
                 if (set.getString(3).equalsIgnoreCase(tableName)) {
                     return true;
