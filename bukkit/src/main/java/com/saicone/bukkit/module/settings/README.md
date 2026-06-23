@@ -54,9 +54,23 @@ try {
 ```java
 YamlConfiguration config = ...;
 
-// modify all the String values in the config
+// set a String parser for any configuration that is read
 BukkitYamlWalker.parse(config, s -> {
     // do something with the string, for example, replace placeholders
     return s.replace("[player]", "Steve");
 });
+
+// then loop or walk through the folder, every configuration will have this String values parsed
+
+for (YamlConfiguration config : walker) {
+    // do something
+}
+
+try {
+    walker.walk(config -> {
+        // do something
+    });
+} catch (IOException e) {
+    // handle exception
+}
 ```

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.minecraft.module.placeholder;
+package com.saicone.velocity.module.placeholder;
 
 import com.saicone.minecraft.module.placeholder.processor.MiniProcessor;
 import org.jetbrains.annotations.NotNull;
