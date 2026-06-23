@@ -28,9 +28,11 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public enum SqlType implements ClientType {
 
@@ -141,24 +143,36 @@ public enum SqlType implements ClientType {
 
     @NotNull
     public String getDriver() {
-        for (String driver : drivers) {
-            try {
-                Class.forName(driver);
-                return driver;
-            } catch (ClassNotFoundException ignored) { }
+        if (drivers.size() > 1) {
+            for (String driver : drivers) {
+                try {
+                    Class.forName(driver);
+                    return driver;
+                } catch (ClassNotFoundException ignored) { }
+            }
         }
-        throw new RuntimeException("Cannot find driver class name for sql type: " + name());
+        return drivers.get(0);
     }
 
     @NotNull
     public String getUrl(@NotNull String host, int port, @NotNull String database, @NotNull String... flags) {
+        return getUrl(host, port, database, List.of(flags));
+    }
+
+    @NotNull
+    public String getUrl(@NotNull String host, int port, @NotNull String database, @NotNull Collection<String> flags) {
         return getUrl(host + ":" + port, database, flags);
     }
 
     @NotNull
     public String getUrl(@NotNull String address, @NotNull String database, @NotNull String... flags) {
+        return getUrl(address, database, List.of(flags));
+    }
+
+    @NotNull
+    public String getUrl(@NotNull String address, @NotNull String database, @NotNull Collection<String> flags) {
         String url = format.replace("{address}", address).replace("{database}", database);
-        if (flags.length < 1) {
+        if (flags.isEmpty()) {
             return url.replace("{flags}", "");
         } else {
             return url.replace("{flags}", "?" + String.join("&", flags));
@@ -168,6 +182,11 @@ public enum SqlType implements ClientType {
     @NotNull
     public String getUrl(@NotNull String path) {
         return format.replace("{path}", path);
+    }
+
+    @NotNull
+    public static Optional<SqlType> of(@NotNull String name) {
+        return Optional.ofNullable(of(name, null));
     }
 
     @Nullable
