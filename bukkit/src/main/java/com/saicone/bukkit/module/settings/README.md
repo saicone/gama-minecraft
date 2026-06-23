@@ -51,6 +51,8 @@ try {
 }
 ```
 
+The BukkitYamlWalker has a built-in parser for String values, which can be set to modify the values when they are read from the configuration.
+
 ```java
 YamlConfiguration config = ...;
 
@@ -59,18 +61,4 @@ BukkitYamlWalker.parse(config, s -> {
     // do something with the string, for example, replace placeholders
     return s.replace("[player]", "Steve");
 });
-
-// then loop or walk through the folder, every configuration will have this String values parsed
-
-for (YamlConfiguration config : walker) {
-    // do something
-}
-
-try {
-    walker.walk(config -> {
-        // do something
-    });
-} catch (IOException e) {
-    // handle exception
-}
 ```
