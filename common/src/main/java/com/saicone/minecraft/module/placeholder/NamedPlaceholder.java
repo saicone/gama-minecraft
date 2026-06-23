@@ -21,20 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.bukkit.module.placeholder;
+package com.saicone.minecraft.module.placeholder;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-public interface MappedPlaceholderProvider<T> extends PlaceholderProvider<T> {
+import java.util.Set;
+
+public interface NamedPlaceholder<T> extends Placeholder<T> {
 
     @NotNull
-    Class<T> getType();
+    Set<String> names();
 
-    default boolean acceptGlobal() {
-        return true;
-    }
+    @NotNull
+    String author();
 
-    @Nullable
-    T map(@NotNull Object object);
+    @NotNull
+    String version();
 }

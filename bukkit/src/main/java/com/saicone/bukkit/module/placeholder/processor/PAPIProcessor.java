@@ -23,11 +23,11 @@
  */
 package com.saicone.bukkit.module.placeholder.processor;
 
-import com.saicone.bukkit.module.placeholder.provider.DelegatePlaceholderProvider;
-import com.saicone.bukkit.module.placeholder.MappedPlaceholderProvider;
-import com.saicone.bukkit.module.placeholder.PlaceholderProcessor;
-import com.saicone.bukkit.module.placeholder.PlaceholderProvider;
-import com.saicone.bukkit.module.placeholder.PluginPlaceholder;
+import com.saicone.bukkit.module.placeholder.impl.BukkitPlaceholder;
+import com.saicone.minecraft.module.placeholder.NamedPlaceholder;
+import com.saicone.minecraft.module.placeholder.Placeholder;
+import com.saicone.minecraft.module.placeholder.PlaceholderProcessor;
+import com.saicone.minecraft.module.placeholder.TypedPlaceholder;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -44,7 +44,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -153,57 +153,50 @@ public class PAPIProcessor implements PlaceholderProcessor {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void register(@NotNull PluginPlaceholder<?> placeholder) {
+    public void register(@NotNull NamedPlaceholder<?> placeholder) {
         if (!enabled()) {
             return;
         }
 
-        final String author = String.join(", ", placeholder.getPlugin().getDescription().getAuthors());
-        final String version = placeholder.getPlugin().getDescription().getVersion();
-        if (placeholder.getType().equals(Player.class)) {
-            for (String name : placeholder.getNames()) {
-                registerOnline(placeholder.getPlugin(), name, author, version, (PlaceholderProvider<Player>) placeholder.getProvider());
+        final Plugin plugin;
+        if (placeholder instanceof BukkitPlaceholder<?>) {
+            plugin = ((BukkitPlaceholder<?>) placeholder).plugin();
+        } else {
+            plugin = null;
+        }
+
+        if (placeholder instanceof TypedPlaceholder<?>) {
+            final TypedPlaceholder<?> typed = (TypedPlaceholder<?>) placeholder;
+
+            final boolean online;
+            if (typed.type().equals(Player.class)) {
+                online = true;
+            } else if (typed.type().equals(OfflinePlayer.class)) {
+                online = false;
+            } else {
+                online = !typed.acceptNull();
+            }
+
+            if (online) {
+                final Placeholder<Player> onlinePlaceholder = typed.as(Player.class);
+                for (String name : placeholder.names()) {
+                    registerOnline(plugin, name, placeholder.author(), placeholder.version(), onlinePlaceholder);
+                }
+            } else {
+                final Placeholder<OfflinePlayer> offlinePlaceholder = typed.as(OfflinePlayer.class);
+                for (String name : placeholder.names()) {
+                    registerOffline(plugin, name, placeholder.author(), placeholder.version(), offlinePlaceholder);
+                }
             }
         } else {
-            final PlaceholderProvider<OfflinePlayer> provider;
-            if (placeholder.getType().equals(OfflinePlayer.class)) {
-                provider = (PlaceholderProvider<OfflinePlayer>) placeholder.getProvider();
-            } else {
-                provider = new DelegatePlaceholderProvider<>((MappedPlaceholderProvider<?>) placeholder.getProvider());
-            }
-            for (String name : placeholder.getNames()) {
-                registerOffline(placeholder.getPlugin(), name, author, version, provider);
+            final Placeholder<Object> objectPlaceholder = (Placeholder<Object>) placeholder;
+            for (String name : placeholder.names()) {
+                registerHeadless(plugin, name, placeholder.author(), placeholder.version(), objectPlaceholder);
             }
         }
     }
 
-    private void registerOffline(@NotNull Plugin plugin, @NotNull String name, @NotNull String author, @NotNull String version, @NotNull PlaceholderProvider<OfflinePlayer> provider) {
-        final PlaceholderExpansion expansion = new PlaceholderExpansion() {
-            @Override
-            public @NotNull String getIdentifier() {
-                return name;
-            }
-
-            @Override
-            public @NotNull String getAuthor() {
-                return author;
-            }
-
-            @Override
-            public @NotNull String getVersion() {
-                return version;
-            }
-
-            @Override
-            public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
-                final Object result = provider.parseParameters(player, params);
-                return result != null ? result.toString() : null;
-            }
-        };
-        registerExpansion(plugin, expansion);
-    }
-
-    private void registerOnline(@NotNull Plugin plugin, @NotNull String name, @NotNull String author, @NotNull String version, @NotNull PlaceholderProvider<Player> provider) {
+    private void registerOnline(@Nullable Plugin plugin, @NotNull String name, @NotNull String author, @NotNull String version, @NotNull Placeholder<Player> placeholder) {
         final PlaceholderExpansion expansion = new PlaceholderExpansion() {
             @Override
             public @NotNull String getIdentifier() {
@@ -222,8 +215,74 @@ public class PAPIProcessor implements PlaceholderProcessor {
 
             @Override
             public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
-                final Object result = provider.parseParameters(player, params);
+                final Object result = placeholder.get(player, params);
                 return result != null ? result.toString() : null;
+            }
+        };
+        registerExpansion(plugin, expansion);
+    }
+
+    private void registerOffline(@Nullable Plugin plugin, @NotNull String name, @NotNull String author, @NotNull String version, @NotNull Placeholder<OfflinePlayer> placeholder) {
+        final PlaceholderExpansion expansion = new PlaceholderExpansion() {
+            @Override
+            public @NotNull String getIdentifier() {
+                return name;
+            }
+
+            @Override
+            public @NotNull String getAuthor() {
+                return author;
+            }
+
+            @Override
+            public @NotNull String getVersion() {
+                return version;
+            }
+
+            @Override
+            public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
+                final Object result = placeholder.get(player, params);
+                return result != null ? result.toString() : null;
+            }
+        };
+        registerExpansion(plugin, expansion);
+    }
+
+    private void registerHeadless(@Nullable Plugin plugin, @NotNull String name, @NotNull String author, @NotNull String version, @NotNull Placeholder<Object> placeholder) {
+        final PlaceholderExpansion expansion = new PlaceholderExpansion() {
+            @Override
+            public @NotNull String getIdentifier() {
+                return name;
+            }
+
+            @Override
+            public @NotNull String getAuthor() {
+                return author;
+            }
+
+            @Override
+            public @NotNull String getVersion() {
+                return version;
+            }
+
+            @Override
+            public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
+                try {
+                    final Object result = placeholder.get(player, params);
+                    return result != null ? result.toString() : null;
+                } catch (ClassCastException e) {
+                    return super.onRequest(player, params);
+                }
+            }
+
+            @Override
+            public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
+                try {
+                    final Object result = placeholder.get(player, params);
+                    return result != null ? result.toString() : null;
+                } catch (ClassCastException e) {
+                    return super.onPlaceholderRequest(player, params);
+                }
             }
         };
         registerExpansion(plugin, expansion);
@@ -303,31 +362,35 @@ public class PAPIProcessor implements PlaceholderProcessor {
         return names;
     }
 
-    private void registerExpansion(@NotNull Plugin plugin, @NotNull Object expansion) {
+    private void registerExpansion(@Nullable Plugin plugin, @NotNull Object expansion) {
         this.registered.put(((PlaceholderExpansion) expansion).getIdentifier(), expansion);
         if (Bukkit.isPrimaryThread()) {
             ((PlaceholderExpansion) expansion).register();
-        } else {
+        } else if (plugin != null) {
             Bukkit.getScheduler().runTask(plugin, () -> ((PlaceholderExpansion) expansion).register());
+        } else {
+            throw new IllegalStateException("Cannot register placeholder from non-primary thread without a plugin reference.");
         }
     }
 
     @Override
-    public void unregister(@NotNull PluginPlaceholder<?> placeholder) {
+    public void unregister(@NotNull NamedPlaceholder<?> placeholder) {
         if (!enabled()) {
             return;
         }
 
         if (Bukkit.isPrimaryThread()) {
             unregister0(placeholder);
+        } else if (placeholder instanceof BukkitPlaceholder<?>) {
+            final Plugin plugin = ((BukkitPlaceholder<?>) placeholder).plugin();
+            Bukkit.getScheduler().runTask(plugin, () -> unregister0(placeholder));
         } else {
-            Bukkit.getScheduler().runTask(placeholder.getPlugin(), () -> unregister0(placeholder));
+            throw new IllegalStateException("Cannot unregister placeholder from non-primary thread without a plugin reference.");
         }
     }
 
-    private void unregister0(@NotNull PluginPlaceholder<?> placeholder) {
-        final Set<String> names = placeholder.getNames();
-        for (String name : names) {
+    private void unregister0(@NotNull NamedPlaceholder<?> placeholder) {
+        for (String name : placeholder.names()) {
             final Object expansion = this.registered.remove(name);
             if (expansion != null) {
                 ((PlaceholderExpansion) expansion).unregister();

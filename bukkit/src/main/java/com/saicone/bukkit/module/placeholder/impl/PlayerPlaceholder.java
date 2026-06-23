@@ -21,41 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.bukkit.module.placeholder.provider;
+package com.saicone.bukkit.module.placeholder.impl;
 
+import com.saicone.minecraft.module.placeholder.TypedPlaceholder;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 
-public class PlayerPlaceholderProvider extends MappedPlaceholderProviderImpl<Player> {
-
-    public PlayerPlaceholderProvider() {
-        this(new HashMap<>());
-    }
-
-    public PlayerPlaceholderProvider(@NotNull Map<String, Function<Player, Object>> staticPlaceholder) {
-        super(staticPlaceholder);
-    }
+public interface PlayerPlaceholder extends TypedPlaceholder<Player> {
 
     @Override
-    public @NotNull Class<Player> getType() {
+    default @NotNull Class<Player> type() {
         return Player.class;
     }
 
     @Override
-    public boolean acceptGlobal() {
+    default boolean acceptNull() {
         return false;
     }
 
     @Override
-    public @Nullable Player map(@NotNull Object object) {
+    default @Nullable Player parse(@Nullable Object object) {
         if (object instanceof Player) {
             return (Player) object;
         } else if (object instanceof OfflinePlayer) {

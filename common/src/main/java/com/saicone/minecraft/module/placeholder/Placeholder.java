@@ -21,33 +21,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.bukkit.module.placeholder;
+package com.saicone.minecraft.module.placeholder;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Function;
+import java.util.Iterator;
 
-public interface PlaceholderProvider<T> {
+public interface Placeholder<T> {
+
+    @NotNull
+    @SuppressWarnings("unchecked")
+    static <T> Placeholder<T> value(@Nullable Object value) {
+        if (value == null) {
+            return (Placeholder<T>) Value.EMPTY;
+        }
+        return new Value<>(value);
+    }
 
     @Nullable
-    Function<T, Object> getStatic(@NotNull String key);
-
-    @Nullable
-    Object getStatic(T t, @NotNull String key);
-
-    @Nullable
-    default Object getDynamic(T t, @NotNull String context) {
+    default Object get(T t) {
         return null;
     }
 
     @Nullable
-    Object parseParameters(T t, @NotNull String parameters);
+    default Object get(T t, @NotNull String parameters) {
+        return get(t);
+    }
+
+    @Nullable
+    default Object get(T t, @NotNull Iterator<String> args) {
+        if (args.hasNext()) {
+            return get(t, args.next());
+        } else {
+            return get(t);
+        }
+    }
 
     @Nullable
     @Contract("_, !null, _, _ -> !null")
-    default String replaceInside(T t, @Nullable String s, char open, char close) {
+    @ApiStatus.NonExtendable
+    default String replaceInside(@Nullable T t, @Nullable String s, char open, char close) {
         if (s == null) {
             return null;
         }
@@ -64,7 +80,7 @@ public interface PlaceholderProvider<T> {
                     i++;
                 } else if (c == close) {
                     inside = false;
-                    final Object replaced = parseParameters(t, parameters.toString());
+                    final Object replaced = this.get(t, parameters.toString());
                     if (replaced != null) {
                         result.append(replaced);
                     } else {
@@ -87,5 +103,26 @@ public interface PlaceholderProvider<T> {
         }
 
         return result.toString();
+    }
+
+    class Value<T> implements Placeholder<T> {
+
+        private static final Value<?> EMPTY = new Value<>(null);
+
+        private final Object value;
+
+        public Value(@Nullable Object value) {
+            this.value = value;
+        }
+
+        @Nullable
+        public Object value() {
+            return value;
+        }
+
+        @Override
+        public @Nullable Object get(T t) {
+            return value;
+        }
     }
 }

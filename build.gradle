@@ -18,6 +18,10 @@ allprojects {
     }
 
     dependencies {
+        if (project.name != 'common') {
+            compileOnly project(':common')
+        }
+
         compileOnly 'org.jetbrains:annotations:26.1.0'
 
         compileOnly fileTree(dir: 'libs', includes: ['*.jar'])

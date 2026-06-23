@@ -21,13 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.bukkit.module.placeholder;
+package com.saicone.minecraft.module.placeholder;
 
+import com.saicone.minecraft.module.placeholder.processor.MiniProcessor;
 import org.jetbrains.annotations.NotNull;
 
-public interface PlaceholderProcessor {
+public class Placeholders {
 
-    void register(@NotNull PluginPlaceholder<?> placeholder);
-
-    void unregister(@NotNull PluginPlaceholder<?> placeholder);
+    @NotNull
+    public static MiniProcessor mini() {
+        return MiniProcessor.INSTANCE;
+    }
 }

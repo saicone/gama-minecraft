@@ -23,6 +23,7 @@
  */
 package com.saicone.bukkit.module.placeholder;
 
+import com.saicone.minecraft.module.placeholder.processor.MiniProcessor;
 import com.saicone.bukkit.module.placeholder.processor.PAPIProcessor;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,4 +34,8 @@ public class Placeholders {
         return PAPIProcessor.INSTANCE;
     }
 
+    @NotNull
+    public static MiniProcessor mini() {
+        return MiniProcessor.INSTANCE;
+    }
 }

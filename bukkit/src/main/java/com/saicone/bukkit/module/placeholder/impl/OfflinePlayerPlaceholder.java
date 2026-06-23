@@ -21,36 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.bukkit.module.placeholder.provider;
+package com.saicone.bukkit.module.placeholder.impl;
 
+import com.saicone.minecraft.module.placeholder.TypedPlaceholder;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 
-public class OfflinePlayerPlaceholderProvider extends MappedPlaceholderProviderImpl<OfflinePlayer> {
-
-    public OfflinePlayerPlaceholderProvider() {
-        this(new HashMap<>());
-    }
-
-    public OfflinePlayerPlaceholderProvider(@NotNull Map<String, Function<OfflinePlayer, Object>> staticPlaceholder) {
-        super(staticPlaceholder);
-    }
+public interface OfflinePlayerPlaceholder extends TypedPlaceholder<OfflinePlayer> {
 
     @Override
-    public @NotNull Class<OfflinePlayer> getType() {
+    default @NotNull Class<OfflinePlayer> type() {
         return OfflinePlayer.class;
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public @Nullable OfflinePlayer map(@NotNull Object object) {
+    default @Nullable OfflinePlayer parse(@Nullable Object object) {
         if (object instanceof OfflinePlayer) {
             return (OfflinePlayer) object;
         } else if (object instanceof UUID) {

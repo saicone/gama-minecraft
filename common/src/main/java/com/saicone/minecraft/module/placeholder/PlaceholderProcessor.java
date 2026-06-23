@@ -21,22 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.bukkit.module.placeholder.provider;
+package com.saicone.minecraft.module.placeholder;
 
-import com.saicone.bukkit.module.placeholder.MappedPlaceholderProvider;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+public interface PlaceholderProcessor {
 
-public abstract class MappedPlaceholderProviderImpl<T> extends PlaceholderProviderImpl<T> implements MappedPlaceholderProvider<T> {
+    void register(@NotNull NamedPlaceholder<?> placeholder);
 
-    public MappedPlaceholderProviderImpl() {
-        this(new HashMap<>());
-    }
-
-    public MappedPlaceholderProviderImpl(@NotNull Map<String, Function<T, Object>> staticPlaceholder) {
-        super(staticPlaceholder);
-    }
+    void unregister(@NotNull NamedPlaceholder<?> placeholder);
 }
