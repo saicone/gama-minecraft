@@ -21,29 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.bukkit.module.placeholder.impl;
+package com.saicone.velocity.module.placeholder.impl;
 
-import com.saicone.minecraft.module.placeholder.impl.RegistrablePlaceholder;
-import org.bukkit.plugin.Plugin;
+import com.saicone.minecraft.module.placeholder.TypedPlaceholder;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
+import java.util.UUID;
 
-public abstract class BukkitPlaceholder<T> extends RegistrablePlaceholder<T> {
-
-    private final Plugin plugin;
-
-    @SuppressWarnings("deprecation")
-    public BukkitPlaceholder(@NotNull Plugin plugin) {
-        this.plugin = plugin;
-
-        this.names = Set.of(plugin.getName().toLowerCase());
-        this.author = String.join(", ", plugin.getDescription().getAuthors());
-        this.version = plugin.getDescription().getVersion();
-    }
+public interface PlayerPlaceholder extends TypedPlaceholder<Player> {
 
     @NotNull
-    public Plugin plugin() {
-        return plugin;
+    ProxyServer proxy();
+
+    @Override
+    default @NotNull Class<Player> type() {
+        return Player.class;
+    }
+
+    @Override
+    @Nullable
+    default Player parse(@Nullable Object object) {
+        if (object instanceof Player) {
+            return (Player) object;
+        } else if (object instanceof UUID) {
+            return proxy().getPlayer((UUID) object).orElse(null);
+        } else if (object instanceof String) {
+            return proxy().getPlayer((String) object).orElse(null);
+        } else {
+            return null;
+        }
     }
 }

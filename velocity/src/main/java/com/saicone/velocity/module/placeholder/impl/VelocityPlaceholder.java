@@ -21,29 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.bukkit.module.placeholder.impl;
+package com.saicone.velocity.module.placeholder.impl;
 
 import com.saicone.minecraft.module.placeholder.impl.RegistrablePlaceholder;
-import org.bukkit.plugin.Plugin;
+import com.velocitypowered.api.plugin.PluginContainer;
+import com.velocitypowered.api.plugin.PluginDescription;
+import com.velocitypowered.api.proxy.ProxyServer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-public abstract class BukkitPlaceholder<T> extends RegistrablePlaceholder<T> {
+public class VelocityPlaceholder<T> extends RegistrablePlaceholder<T> {
 
-    private final Plugin plugin;
+    private final ProxyServer proxy;
+    private final Object plugin;
 
-    @SuppressWarnings("deprecation")
-    public BukkitPlaceholder(@NotNull Plugin plugin) {
+    public VelocityPlaceholder(@NotNull ProxyServer server, @NotNull Object plugin) {
+        this.proxy = server;
         this.plugin = plugin;
 
-        this.names = Set.of(plugin.getName().toLowerCase());
-        this.author = String.join(", ", plugin.getDescription().getAuthors());
-        this.version = plugin.getDescription().getVersion();
+        final PluginContainer container = server.getPluginManager().ensurePluginContainer(plugin);
+        final PluginDescription description = container.getDescription();
+        this.names = Set.of(description.getId().toLowerCase());
+        this.author = String.join(", ", description.getAuthors());
+        this.version = description.getVersion().orElse("1.0");
     }
 
     @NotNull
-    public Plugin plugin() {
+    public ProxyServer proxy() {
+        return proxy;
+    }
+
+    @NotNull
+    public Object plugin() {
         return plugin;
     }
 }

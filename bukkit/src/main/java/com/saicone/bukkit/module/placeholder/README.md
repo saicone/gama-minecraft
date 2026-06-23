@@ -40,7 +40,9 @@ Then you can use your placeholder to parse any object by its key.
 
 Let's assume the placeholder name is `example`, and you put the key `greeting` with a value.
 
-The value will be resolved on PlaceholderAPI as `%example_greeting%` and on MiniPlaceholders as `<example_greeting>`.
+The value will be resolved on:
+* PlaceholderAPI as `%example_greeting%`.
+* MiniPlaceholders as `<example_greeting>`.
 
 ```java
 Plugin plugin = ...;
@@ -64,11 +66,15 @@ placeholder.put("greeting", player -> {
 
 You can also register placeholders that accept dynamic arguments.
 
-PlaceholderAPI provides a `String` as "parameters", and MiniPlaceholders provides a `Iterator<String>`.
+The processor for:
+* PlaceholderAPI provides a `String` as "parameters".
+* MiniPlaceholders provides a `Iterator<String>`.
 
 If you only accept one argument, you can only extend the method that accept the `String` "parameters".
 
-In this example, the value will be resolved on PlaceholderAPI as `%example_sum_<arg1>_<arg2>_<arg3>...etc%` and on MiniPlaceholders as `<example_sum:<arg1>:<arg2>:<arg3>...etc>`.
+In this example, the value will be resolved on:
+* PlaceholderAPI as `%example_sum_<arg1>_<arg2>_<arg3>...etc%`.
+* MiniPlaceholders as `<example_sum:<arg1>:<arg2>:<arg3>...etc>`.
 
 ```java
 Plugin plugin = ...;
@@ -81,10 +87,10 @@ placeholder.put("sum", new Placeholder<Player>() {
     }
 
     @Override
-    public Object get(@NotNull Player player, @NotNull Iterator<String> arg) {
+    public Object get(@NotNull Player player, @NotNull Iterator<String> args) {
         int sum = 0;
-        while (arg.hasNext()) {
-            String next = arg.next();
+        while (args.hasNext()) {
+            String next = args.next();
             try {
                 sum += Integer.parseInt(next);
             } catch (NumberFormatException e) {
