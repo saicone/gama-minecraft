@@ -26,8 +26,8 @@ package com.saicone.minecraft.module.placeholder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -38,11 +38,11 @@ public class ComposedPlaceholder<T> implements Placeholder<T> {
     private final Map<String, Placeholder<T>> children;
 
     public ComposedPlaceholder() {
-        this(null, new HashMap<>());
+        this(null, new LinkedHashMap<>());
     }
 
     public ComposedPlaceholder(@Nullable ComposedPlaceholder<T> parent) {
-        this(parent, new HashMap<>());
+        this(parent, new LinkedHashMap<>());
     }
 
     public ComposedPlaceholder(@NotNull Map<String, Placeholder<T>> children) {
