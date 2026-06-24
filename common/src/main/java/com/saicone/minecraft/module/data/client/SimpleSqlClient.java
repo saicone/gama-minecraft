@@ -23,6 +23,7 @@
  */
 package com.saicone.minecraft.module.data.client;
 
+import com.saicone.minecraft.module.data.DataClient;
 import com.saicone.minecraft.module.data.sql.SqlConnection;
 import com.saicone.minecraft.module.data.sql.SqlType;
 import com.zaxxer.hikari.HikariConfig;
@@ -43,7 +44,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class SimpleSqlClient {
+public abstract class SimpleSqlClient implements DataClient {
 
     // config
     protected SqlType defaultType = SqlType.MYSQL;
@@ -69,6 +70,7 @@ public abstract class SimpleSqlClient {
         return connection;
     }
 
+    @Override
     public void load(@NotNull Map<String, Object> config) {
         this.type = string(config, "type")
                 .map(s -> SqlType.of(s, null))
@@ -115,6 +117,7 @@ public abstract class SimpleSqlClient {
         onLoad();
     }
 
+    @Override
     public void start() {
         boolean useHikari = false;
         try {
@@ -147,6 +150,7 @@ public abstract class SimpleSqlClient {
         onStart();
     }
 
+    @Override
     public void close() {
         onClose();
 
