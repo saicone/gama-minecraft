@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 public class MiniProcessor implements PlaceholderProcessor {
 
     public static final MiniProcessor INSTANCE = new MiniProcessor();
-    private static final Pattern PATTERN = Pattern.compile("^<([a-zA-Z0-9_]+)(?::[^>]*)?>$");
+    private static final Pattern PATTERN = Pattern.compile("<([a-zA-Z0-9_]+)(?::[^>]*)?>");
 
     // lazy init var
     private final Supplier<Boolean> enabled = new Supplier<>() {
