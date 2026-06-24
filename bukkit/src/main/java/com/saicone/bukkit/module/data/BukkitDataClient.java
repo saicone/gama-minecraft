@@ -21,24 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.saicone.minecraft.module.data.client;
+package com.saicone.bukkit.module.data;
 
 import com.saicone.minecraft.module.data.DataClient;
+import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 
-public interface MapDataClient extends DataClient {
+public interface BukkitDataClient extends DataClient {
+
+    default void load(@NotNull ConfigurationSection config) {
+        this.load(configToMap(config));
+    }
 
     @NotNull
-    Map<String, Object> loadMap(@NotNull UUID user);
-
-    @Nullable
-    Object loadMapValue(@NotNull UUID user, @NotNull String key);
-
-    void saveMap(@NotNull UUID user, @NotNull Map<String, Object> map);
-
-    void saveMapEntry(@NotNull UUID user, @NotNull String key, @Nullable Object value);
+    private static Map<String, Object> configToMap(@NotNull ConfigurationSection section) {
+        final Map<String, Object> map = new LinkedHashMap<>();
+        for (String key : section.getKeys(false)) {
+            Object value = section.get(key);
+            if (value instanceof ConfigurationSection) {
+                value = configToMap((ConfigurationSection) value);
+            }
+            map.put(key, value);
+        }
+        return map;
+    }
 }
