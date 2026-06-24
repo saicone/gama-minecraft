@@ -26,14 +26,19 @@ package com.saicone.bukkit.module.data;
 import com.saicone.minecraft.module.data.DataClient;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public interface BukkitDataClient extends DataClient {
 
-    default void load(@NotNull ConfigurationSection config) {
-        this.load(configToMap(config));
+    default void load(@Nullable ConfigurationSection config) {
+        if (config == null) {
+            load(Map.of());
+        } else {
+            this.load(configToMap(config));
+        }
     }
 
     @NotNull
