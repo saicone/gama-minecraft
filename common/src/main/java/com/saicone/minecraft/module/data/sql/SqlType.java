@@ -47,7 +47,7 @@ public enum SqlType implements ClientType {
     MARIADB(
             true,
             "jdbc:mariadb://{address}/{database}{flags}",
-            "org{}mariadb{}jdbc:mariadb-java-client:3.5.8",
+            "org{}mariadb{}jdbc:mariadb-java-client:3.5.9",
             "org.mariadb.jdbc.Driver",
             Map.of("org{}mariadb{}jdbc", "org.mariadb.jdbc")
     ),
@@ -68,7 +68,7 @@ public enum SqlType implements ClientType {
     SQLITE(
             false,
             "jdbc:sqlite:{path}.db",
-            "org{}xerial:sqlite-jdbc:3.53.1.0",
+            "org{}xerial:sqlite-jdbc:3.53.2.0",
             "org.sqlite.JDBC",
             Map.of("org{}sqlite", "org.sqlite")
     );
