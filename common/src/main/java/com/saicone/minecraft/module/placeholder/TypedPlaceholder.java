@@ -48,7 +48,7 @@ public interface TypedPlaceholder<T> extends Placeholder<T> {
 
     @NotNull
     @SuppressWarnings("unchecked")
-    default <A> TypedPlaceholder<A> as(@NotNull Class<A> type) {
+    default <A> TypedPlaceholder<A> forType(@NotNull Class<A> type) {
         if (type.equals(this.type()) || type.isAssignableFrom(this.type())) {
             return (TypedPlaceholder<A>) this;
         }

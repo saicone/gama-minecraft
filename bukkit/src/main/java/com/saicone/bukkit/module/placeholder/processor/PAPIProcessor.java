@@ -177,12 +177,12 @@ public class PAPIProcessor implements PlaceholderProcessor {
             }
 
             if (online) {
-                final Placeholder<Player> onlinePlaceholder = typed.as(Player.class);
+                final Placeholder<Player> onlinePlaceholder = typed.forType(Player.class);
                 for (String name : placeholder.names()) {
                     registerOnline(plugin, name, placeholder.author(), placeholder.version(), onlinePlaceholder);
                 }
             } else {
-                final Placeholder<OfflinePlayer> offlinePlaceholder = typed.as(OfflinePlayer.class);
+                final Placeholder<OfflinePlayer> offlinePlaceholder = typed.forType(OfflinePlayer.class);
                 for (String name : placeholder.names()) {
                     registerOffline(plugin, name, placeholder.author(), placeholder.version(), offlinePlaceholder);
                 }
@@ -213,6 +213,11 @@ public class PAPIProcessor implements PlaceholderProcessor {
             }
 
             @Override
+            public boolean persist() {
+                return true;
+            }
+
+            @Override
             public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
                 final Object result = placeholder.get(player, params);
                 return result != null ? result.toString() : null;
@@ -239,6 +244,11 @@ public class PAPIProcessor implements PlaceholderProcessor {
             }
 
             @Override
+            public boolean persist() {
+                return true;
+            }
+
+            @Override
             public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
                 final Object result = placeholder.get(player, params);
                 return result != null ? result.toString() : null;
@@ -262,6 +272,11 @@ public class PAPIProcessor implements PlaceholderProcessor {
             @Override
             public @NotNull String getVersion() {
                 return version;
+            }
+
+            @Override
+            public boolean persist() {
+                return true;
             }
 
             @Override
