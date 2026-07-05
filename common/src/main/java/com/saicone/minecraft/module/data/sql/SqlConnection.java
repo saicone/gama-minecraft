@@ -40,7 +40,7 @@ public interface SqlConnection {
 
         // hikari
         try {
-            final Class<?> type = Class.forName("om.zaxxer.hikari.HikariDataSource");
+            final Class<?> type = Class.forName("com.zaxxer.hikari.HikariDataSource");
             if (type.isInstance(object)) {
                 return new Hikari((com.zaxxer.hikari.HikariDataSource) object);
             }
