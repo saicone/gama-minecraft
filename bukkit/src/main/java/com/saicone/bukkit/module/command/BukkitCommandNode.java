@@ -39,10 +39,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -542,6 +545,93 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
             }
         }
         return builder.toString();
+    }
+
+    @NotNull
+    public static String[] readQuoted(@NotNull String[] args, int start) {
+        if (start >= args.length) {
+            return new String[0];
+        }
+
+        final StringJoiner joiner = new StringJoiner(" ");
+        for (int i = start; i < args.length; i++) {
+            joiner.add(args[i]);
+        }
+
+        return readQuoted(joiner.toString());
+    }
+
+    @NotNull
+    public static String[] readQuoted(@NotNull String str) {
+        final List<String> list = new ArrayList<>();
+
+        final StringBuilder arg = new StringBuilder();
+        Character quote = null;
+        for (int i = 0; i < str.length(); i++) {
+            final char c = str.charAt(i);
+            if (quote != null) {
+                if (c == quote) {
+                    list.add(arg.toString());
+                    arg.setLength(0);
+                    quote = null;
+                } else if (c == '\\' && i + 1 < str.length() && str.charAt(i + 1) == quote) {
+                    arg.append(quote);
+                    i++;
+                } else {
+                    arg.append(c);
+                }
+            } else if (c == ' ') {
+                if (!arg.isEmpty()) {
+                    list.add(arg.toString());
+                    arg.setLength(0);
+                }
+            } else if (arg.isEmpty() && isQuote(c)) {
+                quote = c;
+            } else {
+                arg.append(c);
+            }
+        }
+
+        if (!arg.isEmpty()) {
+            if (quote == null) {
+                list.add(arg.toString());
+            } else {
+                list.add(quote + arg.toString());
+            }
+        }
+
+        return list.toArray(new String[0]);
+    }
+
+    @NotNull
+    public static Map<String, Object> readOptions(@NotNull String[] args, int start) {
+        final Map<String, Object> options = new HashMap<>();
+        for (int i = start; i < args.length; i++) {
+            final String arg = args[i];
+            if (arg.startsWith("--")) {
+                final String[] split = arg.substring(2).split("=", 2);
+                if (split.length == 2) {
+                    Object value;
+                    try {
+                        value = Integer.parseInt(split[1]);
+                    } catch (Throwable e) {
+                        try {
+                            value = Double.parseDouble(split[1]);
+                        } catch (Throwable ex) {
+                            value = split[1];
+                        }
+                    }
+                    options.put(split[0].toLowerCase(), value);
+                } else {
+                    options.put(split[0].toLowerCase(), true);
+                }
+            }
+        }
+        return options;
+    }
+
+    private static boolean isQuote(char c) {
+        return c == '"' || c == '\'' || c == '`';
     }
 
     public class Bridge extends Command {
