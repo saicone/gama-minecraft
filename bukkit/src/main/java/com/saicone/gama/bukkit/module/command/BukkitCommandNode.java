@@ -275,10 +275,13 @@ public abstract class BukkitCommandNode implements BukkitCommandExecution {
 
     public boolean hasPermission(@NotNull CommandSender sender) {
         final String permission = getPermission();
-        if (permission == null || permission.length() == 0) {
+        if (permission == null || permission.isEmpty()) {
             return true;
         }
+        return hasPermission(sender, permission);
+    }
 
+    public static boolean hasPermission(@NotNull CommandSender sender, @NotNull String permission) {
         if (sender instanceof Player && sender.isOp() && USE_LUCKPERMS.get()) {
             final var data = LuckPermsProvider.get().getUserManager().getUser(((Player) sender).getUniqueId()).getCachedData().getPermissionData();
             for (String p : permission.split(";")) {
