@@ -1,7 +1,7 @@
 /*
  *  MIT License.
  *
- *  Copyright (c) 2024-2026 Rubenicos
+ *  Copyright (c) 2026 Rubenicos
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -152,6 +152,9 @@ public final class SmallFont {
     public interface Tag extends Modifying, Function<Character, Character> {
         @Override
         default Component apply(@NotNull Component current, int depth) {
+            if (depth == 0) {
+                return Component.empty();
+            }
             if (current instanceof TextComponent) {
                 final String content = ((TextComponent) current).content();
                 final String parsed = parse(content);
@@ -165,8 +168,8 @@ public final class SmallFont {
         @NotNull
         private String parse(@NotNull String s) {
             final StringBuilder builder = new StringBuilder(s.length());
-            for (char c : s.toCharArray()) {
-                builder.append(apply(c));
+            for (int i = 0; i < s.length(); i++) {
+                builder.append(apply(s.charAt(i)));
             }
             return builder.toString();
         }
