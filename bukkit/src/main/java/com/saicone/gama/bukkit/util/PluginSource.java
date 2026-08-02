@@ -38,17 +38,31 @@ import java.nio.charset.StandardCharsets;
 import java.security.CodeSource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.jar.JarFile;
 
 public final class PluginSource {
 
+    public static Plugin DEFAULT = null;
     private static final Map<Class<?>, Plugin> CACHE = new HashMap<>();
 
     PluginSource() {
     }
 
+    @NotNull
+    public static Plugin unchecked() {
+        try {
+            return Objects.requireNonNull(get());
+        } catch (Throwable t) {
+            throw new RuntimeException("There was an error while trying to get the current plugin, consider using '" + PluginSource.class.getName() + ".DEFAULT = this' on your plugin initialization to avoid this error", t);
+        }
+    }
+
     @Nullable
     public static synchronized Plugin get() throws IOException, URISyntaxException {
+        if (DEFAULT != null) {
+            return DEFAULT;
+        }
         return get(PluginSource.class);
     }
 
