@@ -65,6 +65,11 @@ public class ComposedPlaceholder<T> implements Placeholder<T> {
     }
 
     @Nullable
+    public Placeholder<T> remove(@NotNull String key) {
+        return children.remove(key);
+    }
+
+    @Nullable
     public Placeholder<T> put(@NotNull String key, @Nullable Object value) {
         return put(key, Placeholder.value(value));
     }

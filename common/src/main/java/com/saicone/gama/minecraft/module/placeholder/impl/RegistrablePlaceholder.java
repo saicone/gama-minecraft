@@ -25,11 +25,14 @@ package com.saicone.gama.minecraft.module.placeholder.impl;
 
 import com.saicone.gama.minecraft.module.placeholder.ComposedPlaceholder;
 import com.saicone.gama.minecraft.module.placeholder.NamedPlaceholder;
+import com.saicone.gama.minecraft.module.placeholder.Placeholder;
 import com.saicone.gama.minecraft.module.placeholder.PlaceholderProcessor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -79,21 +82,65 @@ public abstract class RegistrablePlaceholder<T> extends ComposedPlaceholder<T> i
     }
 
     public void register(@NotNull Set<String> names) {
-        if (this.registered) {
+        if (registered()) {
             unregister();
         }
 
         this.names = names;
-        for (PlaceholderProcessor processor : this.processors) {
-            processor.register(this);
+        register(this);
+        for (Map.Entry<String, Placeholder<T>> entry : children().entrySet()) {
+            if (entry.getValue() instanceof NamedPlaceholder<?>) {
+                register((NamedPlaceholder<T>) entry.getValue());
+            }
         }
         this.registered = true;
     }
 
+    private void register(@NotNull NamedPlaceholder<T> placeholder) {
+        if (placeholder.names().isEmpty()) {
+            return;
+        }
+        for (PlaceholderProcessor processor : this.processors) {
+            processor.register(placeholder);
+        }
+    }
+
     public void unregister() {
         this.registered = false;
-        for (PlaceholderProcessor processor : this.processors) {
-            processor.unregister(this);
+        for (Map.Entry<String, Placeholder<T>> entry : children().entrySet()) {
+            if (entry.getValue() instanceof NamedPlaceholder<?>) {
+                unregister((NamedPlaceholder<T>) entry.getValue());
+            }
         }
+        unregister(this);
+    }
+
+    private void unregister(@NotNull NamedPlaceholder<T> placeholder) {
+        for (PlaceholderProcessor processor : this.processors) {
+            processor.unregister(placeholder);
+        }
+    }
+
+    @Override
+    public @Nullable Placeholder<T> remove(@NotNull String key) {
+        final Placeholder<T> result = super.remove(key);
+        if (registered() && result instanceof NamedPlaceholder<T>) {
+            unregister((NamedPlaceholder<T>) result);
+        }
+        return result;
+    }
+
+    @Override
+    public @Nullable Placeholder<T> put(@NotNull String key, @NotNull Placeholder<T> placeholder) {
+        final Placeholder<T> result = super.put(key, placeholder);
+        if (registered()) {
+            if (result instanceof NamedPlaceholder<T>) {
+                unregister((NamedPlaceholder<T>) result);
+            }
+            if (placeholder instanceof NamedPlaceholder<T>) {
+                register((NamedPlaceholder<T>) placeholder);
+            }
+        }
+        return result;
     }
 }
