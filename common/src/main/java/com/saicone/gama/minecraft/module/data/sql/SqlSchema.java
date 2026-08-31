@@ -23,6 +23,8 @@
  */
 package com.saicone.gama.minecraft.module.data.sql;
 
+import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedInputStream;
@@ -216,5 +218,51 @@ public class SqlSchema {
             }
         }
         this.loaded = true;
+    }
+
+    @NotNull
+    @Contract("_, _, _ -> this")
+    public SqlSchema set(@NotNull SqlType sql, @NotNull String type, @NotNull @Language("sql") String script) {
+        List<String> queries = new ArrayList<>();
+        StringJoiner joiner = new StringJoiner(" ");
+        for (String line : script.split("\n")) {
+            // Ignore top comment
+            if (line.startsWith("#") || line.startsWith("--")) {
+                continue;
+            }
+            // Ignore side comment
+            line = line.split(" --", 2)[0];
+
+            if (line.endsWith(";")) {
+                joiner.add(line.substring(0, line.length() - 1));
+                String query = joiner.toString();
+                if (!query.isBlank()) {
+                    queries.add(query);
+                }
+                joiner = new StringJoiner(" ");
+            } else {
+                joiner.add(line);
+            }
+        }
+        this.queries.computeIfAbsent(sql, __ -> new HashMap<>()).put(type, queries);
+        return this;
+    }
+
+    @NotNull
+    @Contract("_, _, _ -> this")
+    public SqlSchema set(@NotNull SqlType sql, @NotNull String type, @NotNull List<String> queries) {
+        this.queries.computeIfAbsent(sql, __ -> new HashMap<>()).put(type, new ArrayList<>(queries));
+        return this;
+    }
+
+    public void put(@NotNull SqlSchema schema) {
+        for (Map.Entry<SqlType, Map<String, List<String>>> entry : schema.getQueries().entrySet()) {
+            final SqlType sql = entry.getKey();
+            for (Map.Entry<String, List<String>> queryEntry : entry.getValue().entrySet()) {
+                final String type = queryEntry.getKey();
+                final List<String> queries = queryEntry.getValue();
+                this.queries.computeIfAbsent(sql, __ -> new HashMap<>()).put(type, new ArrayList<>(queries));
+            }
+        }
     }
 }
