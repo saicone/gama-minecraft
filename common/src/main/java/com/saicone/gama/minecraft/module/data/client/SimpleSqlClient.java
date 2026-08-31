@@ -84,7 +84,11 @@ public abstract class SimpleSqlClient implements DataClient {
                 final String host = string(config, "host").orElse(null);
                 final Integer port = integer(config, "port").orElse(null);
                 if (host == null) {
-                    return "localhost:3306";
+                    if (port == null) {
+                        return "localhost:3306";
+                    } else {
+                        return "localhost:" + port;
+                    }
                 } else if (port == null) {
                     return host + ":3306";
                 } else {
