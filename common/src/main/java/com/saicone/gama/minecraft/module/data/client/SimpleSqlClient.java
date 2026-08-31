@@ -174,7 +174,7 @@ public abstract class SimpleSqlClient implements DataClient {
     }
 
     @NotNull
-    protected String schema(@NotNull Map<SqlType, String> map, @NotNull Object... args) {
+    public String schema(@NotNull Map<SqlType, String> map, @NotNull Object... args) {
         String s = map.get(this.type);
         if (s == null) {
             s = map.get(this.defaultType);
@@ -191,7 +191,7 @@ public abstract class SimpleSqlClient implements DataClient {
     }
 
     @NotNull
-    protected String parse(@NotNull String s, @NotNull Object... args) {
+    public String parse(@NotNull String s, @NotNull Object... args) {
         s = s.replace("{prefix}", this.prefix);
         for (int i = 0; i + 1 < args.length; i += 2) {
             s = s.replace(String.valueOf(args[i]), String.valueOf(args[i + 1]));
@@ -199,21 +199,21 @@ public abstract class SimpleSqlClient implements DataClient {
         return s;
     }
 
-    protected void connect(@NotNull SqlConnection.SqlConsumer consumer) {
+    public void connect(@NotNull SqlConnection.SqlConsumer consumer) {
         this.connection.connect(consumer);
     }
 
-    protected <R> R connect(@NotNull SqlConnection.SqlFunction<R> consumer) {
+    public <R> R connect(@NotNull SqlConnection.SqlFunction<R> consumer) {
         return this.connection.connect(consumer);
     }
 
-    protected boolean isTablePresent(@NotNull String tableName) {
+    public boolean isTablePresent(@NotNull String tableName) {
         return connect(con -> {
             return isTablePresent(con, tableName);
         });
     }
 
-    protected boolean isTablePresent(@NotNull Connection con, @NotNull String tableName) throws SQLException {
+    public boolean isTablePresent(@NotNull Connection con, @NotNull String tableName) throws SQLException {
         try (ResultSet set = this.type == SqlType.POSTGRESQL
                 ? con.getMetaData().getTables(null, null, "%", new String[] { "TABLE" })
                 : con.getMetaData().getTables(con.getCatalog(), null, "%", null)) {

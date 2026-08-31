@@ -28,6 +28,11 @@ import com.saicone.gama.minecraft.module.data.sql.SqlType;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class SchemaSqlClient extends SimpleSqlClient {
 
@@ -52,8 +57,17 @@ public abstract class SchemaSqlClient extends SimpleSqlClient {
     }
 
     @NotNull
-    protected String schema(@NotNull String key) {
+    public String schema(@NotNull String key) {
         return parse(this.schema.get(this.type(), key));
+    }
+
+    @NotNull
+    public List<String> schemaList(@NotNull String key) {
+        final List<String> result = new ArrayList<>();
+        for (String sql : this.schema.getList(this.type(), key)) {
+            result.add(parse(sql));
+        }
+        return result;
     }
 
     @Override
@@ -69,4 +83,18 @@ public abstract class SchemaSqlClient extends SimpleSqlClient {
     }
 
     protected abstract void loadSchema() throws IOException;
+
+    public void computeTable(@NotNull Connection con, @NotNull String tableName, @NotNull String schemaKey) throws SQLException {
+        if (isTablePresent(con, parse(tableName))) {
+            return;
+        }
+
+        try (Statement stmt = con.createStatement()) {
+            for (String sql : schemaList(schemaKey)) {
+                stmt.addBatch(sql);
+            }
+
+            stmt.executeBatch();
+        }
+    }
 }
