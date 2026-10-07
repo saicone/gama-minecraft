@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public class MLocale {
 
@@ -191,6 +192,11 @@ public class MLocale {
     }
 
     private static final Locale DEFAULT = fromMinecraftLocale("en_us", null);
+
+    @NotNull
+    public static Set<String> values() {
+        return ALIASES.keySet();
+    }
 
     @NotNull
     public static Locale fromMinecraftLocale(@Nullable String locale) {
