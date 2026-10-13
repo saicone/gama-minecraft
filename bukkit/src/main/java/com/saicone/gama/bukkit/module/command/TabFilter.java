@@ -34,6 +34,18 @@ import java.util.Map;
 
 public abstract class TabFilter {
 
+    private static final TabFilter EMPTY = new TabFilter() {
+        @Override
+        public @NotNull List<String> get(@NotNull String argument) {
+            return Collections.emptyList();
+        }
+    };
+
+    @NotNull
+    public static TabFilter empty() {
+        return EMPTY;
+    }
+
     @NotNull
     public static TabFilter of(@NotNull String... values) {
         return of(List.of(values));
