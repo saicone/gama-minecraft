@@ -36,6 +36,11 @@ public abstract class TabFilter {
 
     private static final TabFilter EMPTY = new TabFilter() {
         @Override
+        public boolean contains(@NotNull String argument) {
+            return true;
+        }
+
+        @Override
         public @NotNull List<String> get(@NotNull String argument) {
             return Collections.emptyList();
         }
@@ -65,6 +70,8 @@ public abstract class TabFilter {
 
         return new Utf(values);
     }
+
+    public abstract boolean contains(@NotNull String argument);
 
     @NotNull
     public abstract List<String> get(@NotNull String argument);
@@ -102,6 +109,21 @@ public abstract class TabFilter {
                 node = node.children.computeIfAbsent(c, k -> new Node());
                 node.matches.add(value);
             }
+        }
+
+        @Override
+        public boolean contains(@NotNull String argument) {
+            Node node = root;
+
+            for (int i = 0; i < argument.length(); i++) {
+                node = node.children.get(Character.toLowerCase(argument.charAt(i)));
+
+                if (node == null) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         @Override
@@ -153,6 +175,27 @@ public abstract class TabFilter {
                 node = child;
                 node.matches.add(value);
             }
+        }
+
+        @Override
+        public boolean contains(@NotNull String argument) {
+            Node node = root;
+
+            for (int i = 0; i < argument.length(); i++) {
+                char c = argument.charAt(i);
+
+                if (c > 0x7F) {
+                    return false;
+                }
+
+                node = node.children[lowercase(c)];
+
+                if (node == null) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         @Override
