@@ -48,11 +48,17 @@ public abstract class TabFilter {
 
     @NotNull
     public static TabFilter of(@NotNull String... values) {
+        if (values.length == 0) {
+            return empty();
+        }
         return of(List.of(values));
     }
 
     @NotNull
     public static TabFilter of(@NotNull Collection<String> values) {
+        if (values.isEmpty()) {
+            return empty();
+        }
         if (isAscii(values)) {
             return new Ascii(values);
         }
